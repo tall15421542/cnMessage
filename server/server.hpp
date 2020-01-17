@@ -1,10 +1,10 @@
 #include "../message/message.hpp"
+#include "../socket/socketCommon.hpp"
 #include<queue>
 #include<vector>
 #include<map>
 #include<string>
 #include "service.hpp"
-#define LISTEN_PORT 3000
 
 using namespace std;
 
@@ -12,8 +12,6 @@ typedef map<string, size_t> ConnectionMap;
 typedef pair<string, size_t> ConnectionMapPair; 
 typedef map<MsgType, Service *> ServiceMap;
 typedef pair<MsgType, Service *> ServiceMapPair;
-typedef Chunk * ChunkElement;
-typedef vector<ChunkElement> ChunkVec;
 typedef map<string, string> UserInfoMap; 
 typedef pair<string, string> UserInfoMapPair;
 

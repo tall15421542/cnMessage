@@ -6,7 +6,7 @@
 #include<string>
 #include "cmd.hpp"
 #include "cmdCharDef.h"
-#include "socketClient.hpp"
+#include "../socket/socketClient.hpp"
 using namespace std;
 class Client;
 

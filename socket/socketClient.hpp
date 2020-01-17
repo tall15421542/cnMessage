@@ -19,7 +19,8 @@
 #include "../message/message.hpp"
 
 #define SERVER_ADDR "localhost"
-#define SERVER_PORT 3000
+#define LISTEN_PORT 3001
+#define SERVER_PORT LISTEN
 
 struct ip_host_port{
 	char * hostname;

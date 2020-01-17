@@ -14,33 +14,9 @@
 #include<assert.h>
 #include<iostream>
 #include<vector>
+#include "../socket/socketCommon.hpp"
 using namespace std;
 
-size_t completeRead(size_t socketFd, char * buffer, size_t size, ChunkVec & chunkVec){
-    size_t readLen = read(socketFd, buffer, size);
-    if(readLen > 0){
-        char * chunk = new char[readLen];
-        memcpy(chunk, buffer, readLen);
-        chunkVec.push_back(new Chunk(chunk, readLen));
-    }
-    // big msg
-    /*
-    Message * msg = (Message *)buffer;
-    while(!msg->completePacketDelivered()){
-        size_t len = read(socketFd, buffer, size);
-        msg = (Message *)buffer;
-        char * chunk = new char(len + 1);
-        memcpy(chunk, buffer, len);
-        chunk[len] = 0;
-        chunkVec.push_back(new Chunk(chunk, len));
-        readLen += len;
-    }*/
-    return readLen;
-}
-
-size_t completeSend(size_t socketFd, void * buffer, size_t size){
-    return send(socketFd, buffer, size, 0);
-}
 void 
 Server::ackMsg(size_t socketFd, Message * msg, size_t size){
     completeSend(socketFd, msg, size);

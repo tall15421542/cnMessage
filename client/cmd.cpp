@@ -1,7 +1,7 @@
 #include "client.hpp"
 #include "cmd.hpp"
 #include "../message/message.hpp"
-#include "socketClient.hpp"
+#include "../socket/socketClient.hpp"
 #include <iostream>
 
 using namespace std;

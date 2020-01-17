@@ -138,13 +138,13 @@ class SignOutMsg: public Message{
     public:
       SignOutMsg(string userName){
         memset(_userName, 0, sizeof(_userName));
-        makeHeader("", "", SIGNUP, payloadSize());
+        makeHeader("", "", SIGNOUT, payloadSize());
         packData(userName);
       }
       void packData(string userName){
         memcpy(_userName, userName.c_str(), userName.length());
       }
-      size_t payloadSize() override{return 1;}
+      size_t payloadSize() override{return sizeof(SignOutMsg) - sizeof(Header);}
       SignOutAck _signOutAck;
       unsigned char _userName[USER_NAME_LENGTH];
 };

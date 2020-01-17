@@ -17,9 +17,8 @@
 #include<iostream>
 using namespace std;
 #include "../message/message.hpp"
+#include "socketCommon.hpp"
 
-#define SERVER_ADDR "localhost"
-#define SERVER_PORT 3000
 
 struct ip_host_port{
 	char * hostname;
@@ -162,4 +161,8 @@ void sendAndWaitAck(size_t sockFd, Message * message, char * charAck){
 }
 
 void monitorSockFd(size_t sockFd){
+	fd_set wait_set;
+	FD_ZERO(&wait_set);
+	FD_SET(sockFd, &wait_set);
+	int res = select(sockFd + 1, &wait_set, NULL, NULL, NULL);
 }

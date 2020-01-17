@@ -97,7 +97,6 @@ SignOutService::service(size_t sockFd, Message * msg){
     string userName(reinterpret_cast<char *>(signOutMsg->_userName));
     ConnectionMap::iterator it = g_server->_connectionMap.find(userName);
     if(it != g_server->_connectionMap.end()){
-        g_server->_connectionMap.erase(userName);
         ackClient(sockFd, SIGNOUT_ACK_SUCCESS, signOutMsg);
     }
 }
