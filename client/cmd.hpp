@@ -1,6 +1,7 @@
 #ifndef CMD_HEADER
 #define CMD_HEADER
 #include "client.hpp"
+#include "../message/message.hpp"
 #include<map>
 using namespace std;
 
@@ -12,18 +13,8 @@ class sendFileCmd;
 
 class LoginCmd;
 class LogoutCmd;
-class RegisterCmd;
+class SignUpCmd;
 class RetrieveCmd; 
-
-enum MsgType{
-    NORMAL_MSG,
-    FILE_MSG,
-    LOGIN_REQ,
-    LOGOUT_REQ,
-    REGISTER_REQ,
-    RETRIEVE_REQ,
-};
-
 
 class Cmd{
   public:
@@ -64,7 +55,7 @@ class SendFileCmd: public SendHandler{
     void sendContent();
 };
 
-// login/logout/register
+// login/logout/signUp
 class LoginCmd: public Cmd{
   public:
     LoginCmd(){};
@@ -79,10 +70,10 @@ class LogoutCmd: public Cmd{
     void cmdExec(vector<string> & argv) override;
 };
 
-class RegisterCmd: public Cmd{
+class SignUpCmd: public Cmd{
   public:
-    RegisterCmd(){};
-    ~RegisterCmd();
+    SignUpCmd(){};
+    ~SignUpCmd();
     void cmdExec(vector<string> & argv) override; 
 };
 

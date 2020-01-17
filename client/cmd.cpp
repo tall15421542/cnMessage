@@ -1,5 +1,7 @@
 #include "client.hpp"
 #include "cmd.hpp"
+#include "../message/message.hpp"
+#include "socketClient.hpp"
 #include <iostream>
 
 using namespace std;
@@ -26,8 +28,20 @@ void SendFileCmd::sendContent() {
 
 }
 
-void RegisterCmd::cmdExec(vector<string> & argv){
-    cout << "\nregisterCmd";
+void SignUpCmd::cmdExec(vector<string> & argv){
+    if(g_client->_clientState != IDLE){
+        cout << "\n you are already signIn";
+        return;
+    }
+    string userName;
+    string password;
+    cout << " Please Enter the userName: ";
+    cin >> userName;
+    cout << " Please Enter the password: ";
+    cin >> password;
+    Message * msg = new SignUpMsg(userName, password);
+    char reply[MAX_MSG_SIZE];
+    sendAndWaitAck(g_client->_socketFd, msg, reply);
 }
 
 void LoginCmd::cmdExec(vector<string> & argv) {
@@ -41,4 +55,5 @@ void LogoutCmd::cmdExec(vector<string> & argv) {
 void RetrieveCmd::cmdExec(vector<string> & argv) {
     cout << "\nretrieveCmd";
 }
+
 

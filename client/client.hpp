@@ -6,6 +6,7 @@
 #include<string>
 #include "cmd.hpp"
 #include "cmdCharDef.h"
+#include "socketClient.hpp"
 using namespace std;
 class Client;
 
@@ -25,7 +26,6 @@ class Client{
 #define READ_BUF_SIZE    65536
 #define TAB_POSITION     8
 #define PG_OFFSET        10
-#define USER_NAME_LENGTH 30
   public:
     Client(): _readBufPtr(_readBuf), _readBufEnd(_readBuf), _historyIdx(0), _tempCmdStored(false),
               _clientState(IDLE), _userName("Unknown"), _personTalking("NOBODY")
@@ -33,8 +33,9 @@ class Client{
       _cmdExecMap.insert(CmdRegPair("send", new SendCmd));
       _cmdExecMap.insert(CmdRegPair("login", new LoginCmd));
       _cmdExecMap.insert(CmdRegPair("logout", new LogoutCmd));
-      _cmdExecMap.insert(CmdRegPair("register", new RegisterCmd));
+      _cmdExecMap.insert(CmdRegPair("signUp", new SignUpCmd));
       _cmdExecMap.insert(CmdRegPair("retrieve", new RetrieveCmd));
+      _socketFd = buildConnection();
     }
     void resetBufAndPrintPrompt() {
         _readBufPtr = _readBufEnd = _readBuf;
@@ -61,7 +62,8 @@ class Client{
     // for cmdExec
     void printError(CMD_ERROR error, string cmd);
     void execCmd(vector<string> &);
-
+    
+    // for send
     // for read cmd 
     char      _readBuf[READ_BUF_SIZE];
     char*     _readBufPtr;
@@ -74,6 +76,9 @@ class Client{
     map<string , vector<char*> *> _messageStore;
     map<string , Cmd*> _cmdExecMap;
     ClientState _clientState;
+
+    // for msg
+    size_t _socketFd;
     string _userName;
     string _personTalking;
 };
