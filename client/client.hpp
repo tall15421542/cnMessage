@@ -31,8 +31,8 @@ class Client{
               _clientState(IDLE_CLIENT), _userName("Unknown"), _personTalking("NOBODY")
     {
       _cmdExecMap.insert(CmdRegPair("send", new SendCmd));
-      _cmdExecMap.insert(CmdRegPair("login", new LoginCmd));
-      _cmdExecMap.insert(CmdRegPair("logout", new LogoutCmd));
+      _cmdExecMap.insert(CmdRegPair("signIn", new SignInCmd));
+      _cmdExecMap.insert(CmdRegPair("signOut", new SignOutCmd));
       _cmdExecMap.insert(CmdRegPair("signUp", new SignUpCmd));
       _cmdExecMap.insert(CmdRegPair("retrieve", new RetrieveCmd));
       _socketFd = buildConnection();

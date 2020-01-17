@@ -40,10 +40,30 @@ MsgService::ackClient(){
 // class SignInService 
 void 
 SignInService::service(size_t socketFd, Message * msg){
-
+    SignInMsg * signInMsg = (SignInMsg * )msg;
+    string userName(reinterpret_cast<char *>(signInMsg->_userName));
+    string password(reinterpret_cast<char *>(signInMsg->_password));
+    UserInfoStatus status = userInfoStatus(userName, password);
+    switch(status){
+        case USER_NOT_EXIST:
+            ackClient(socketFd, SIGNIN_ACK_USER_NOT_EXIST, signInMsg);
+            break;
+        case USER_PASS_NOT_MATCH:
+            ackClient(socketFd, SIGNIN_ACK_PASS_NOT_MATCH, signInMsg);
+            break;
+        case USER_MATCH:
+            ackClient(socketFd, SIGNIN_ACK_SUCCESS, signInMsg);
+            break;
+        default:
+            cout << "\nUnhandle userInfo status" << endl;
+            exit(1);
+    }
 }
 void 
-SignInService::ackClient(){
+SignInService::ackClient(size_t sockFd, SignInAck ackStatus, SignInMsg * ack){
+    ack->_header._isAck = true;
+    ack->_signInAck = ackStatus;    
+    g_server->ackMsg(sockFd, ack, sizeof(SignInMsg)); 
 }
 
 // class SignUpService 

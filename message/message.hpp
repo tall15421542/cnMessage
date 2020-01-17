@@ -44,6 +44,7 @@ class Header{
 };
 class Message{
     public:
+      virtual ~Message(){};
       Header _header;
       bool completePacketDelivered(){
         return _header._completeLength == (_header._startLength + _header._contentLength);
@@ -87,9 +88,25 @@ class FileMsg: public Message{
       unsigned char _data[MAX_MSG_SIZE - MAX_FILENAME_LEN - sizeof(Header)];
 };
 
+enum SignInAck{
+    SIGNIN_ACK_SUCCESS,
+    SIGNIN_ACK_USER_NOT_EXIST,
+    SIGNIN_ACK_PASS_NOT_MATCH,
+};
 class SignInMsg: public Message{
     public:
-      size_t payloadSize() override{return 1;}
+        SignInMsg(string userName, string password){
+            memset(_userName, 0, sizeof(_userName));
+            memset(_password, 0, sizeof(_password));
+            makeHeader("", "", SIGNIN, payloadSize());
+            packData(userName, password);
+        }
+        void packData(string userName, string password){
+            memcpy(_userName, userName.c_str(), userName.length());
+            md5(password.c_str() , password.length(), _password);
+        }
+        size_t payloadSize() override{return sizeof(SignInMsg) - sizeof(Header);}
+        SignInAck _signInAck;
         unsigned char _userName[USER_NAME_LENGTH];
         unsigned char _password[MD5_DIGEST_LENGTH];
 };
@@ -107,12 +124,15 @@ enum SignUpAck{
 class SignUpMsg: public Message{
     public:
         SignUpMsg(string userName, string password){
+            memset(_userName, 0, sizeof(_userName));
+            memset(_password, 0, sizeof(_password));
             makeHeader("", "", SIGNUP, payloadSize());
             packData(userName, password);
         }
-        size_t payloadSize() override{ return sizeof(_userName) + sizeof(_password); }
+        size_t payloadSize() override{ return sizeof(SignUpMsg) - sizeof(Header); }
         void packData(string userName, string password){
             memcpy(_userName, userName.c_str(), userName.length());
+            _userName[userName.length()] = 0;
             md5(password.c_str() , password.length(), _password);
         }
         SignUpAck _signUpAck;

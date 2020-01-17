@@ -56,17 +56,17 @@ class SendFileCmd: public SendHandler{
 };
 
 // login/logout/signUp
-class LoginCmd: public Cmd{
+class SignInCmd: public Cmd{
   public:
-    LoginCmd(){};
-    ~LoginCmd();
+    SignInCmd(){};
+    ~SignInCmd();
     void cmdExec(vector<string> & argv) override;
 };
 
-class LogoutCmd: public Cmd{
+class SignOutCmd: public Cmd{
   public:
-    LogoutCmd(){};
-    ~LogoutCmd();
+    SignOutCmd(){};
+    ~SignOutCmd();
     void cmdExec(vector<string> & argv) override;
 };
 
