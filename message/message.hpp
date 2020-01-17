@@ -12,7 +12,9 @@ enum MsgType{
     SIGNIN,
     SIGNUP,
     SIGNOUT,
+    HISTORY,
 };
+
 
 // util
 void md5(const char* str, size_t len, uint8_t digest[MD5_DIGEST_LENGTH]);
@@ -38,6 +40,7 @@ class Header{
     size_t _contentLength;
     size_t _completeLength;
     MsgType _msgType;
+    bool _isAck;
 };
 class Message{
     public:
@@ -54,6 +57,7 @@ class Message{
         _header._contentLength = size;
         _header._completeLength = size;
         _header._msgType = type;
+        _header._isAck = false;
       }
       
       void md5(const char* str, size_t len, uint8_t digest[MD5_DIGEST_LENGTH]) {
@@ -96,16 +100,22 @@ class SignOutMsg: public Message{
         unsigned char _userName[USER_NAME_LENGTH];
 };
 
+enum SignUpAck{
+    SIGNUP_ACK_SUCCESS,
+    SIGNUP_ACK_FAIL,
+};
 class SignUpMsg: public Message{
     public:
         SignUpMsg(string userName, string password){
             makeHeader("", "", SIGNUP, payloadSize());
+            packData(userName, password);
         }
         size_t payloadSize() override{ return sizeof(_userName) + sizeof(_password); }
         void packData(string userName, string password){
             memcpy(_userName, userName.c_str(), userName.length());
             md5(password.c_str() , password.length(), _password);
         }
+        SignUpAck _signUpAck;
         unsigned char _userName[USER_NAME_LENGTH];
         unsigned char _password[MD5_DIGEST_LENGTH];
 };

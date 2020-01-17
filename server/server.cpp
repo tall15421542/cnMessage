@@ -35,7 +35,16 @@ size_t completeRead(size_t socketFd, char * buffer, size_t size, ChunkVec & chun
         readLen += len;
     }*/
     return readLen;
-} 
+}
+
+size_t completeSend(size_t socketFd, void * buffer, size_t size){
+    return send(socketFd, buffer, size, 0);
+}
+void 
+Server::ackMsg(size_t socketFd, Message * msg, size_t size){
+    completeSend(socketFd, msg, size);
+}
+
 void 
 Server::serverListen(){
 	signal(SIGPIPE, SIG_IGN);
@@ -119,15 +128,24 @@ Server::receiveCompleteMsg(){
 }
 
 void 
-Server::dispatch(size_t sockeFd, ChunkVec & chunkVec){
+Server::dispatch(size_t socketFd, ChunkVec & chunkVec){
     
     // TODO big file case
     Chunk * chunk = chunkVec[0];
     size_t chunkSize = chunk->_size;
+    size_t dataSize = chunkSize;
     char * data = new char[chunkSize];
     memcpy(data, chunk->_data, chunkSize);
     delete chunk;
     Message * message = (Message *)data;
     cout << message->_header._msgType << endl;
+
+    ServiceMap::iterator it = _serviceMap.find(message->_header._msgType);
+    if(it == _serviceMap.end()){
+        cout << "Unhandled service type" << endl;
+        exit(1);
+    }
+    Service * service = it->second;
+    service->service(socketFd, message);
     delete[] data;
 }

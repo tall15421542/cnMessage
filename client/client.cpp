@@ -63,8 +63,10 @@ Client::readCmdInt(istream& istr)
          case NEWLINE_KEY    : {
                                 vector<string> cmdTokens;
                                 getCmdTokens(cmdTokens);
-                                execCmd(cmdTokens);
-                                addHistory();
+                                if(cmdTokens.size() > 0){
+                                    execCmd(cmdTokens);
+                                    addHistory();
+                                }
                                 cout << char(NEWLINE_KEY);
                                 resetBufAndPrintPrompt(); 
                                 break;

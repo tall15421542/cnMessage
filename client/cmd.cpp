@@ -35,13 +35,18 @@ void SignUpCmd::cmdExec(vector<string> & argv){
     }
     string userName;
     string password;
-    cout << " Please Enter the userName: ";
+    string noop;
+    cout << "\nPlease Enter the userName: ";
     cin >> userName;
-    cout << " Please Enter the password: ";
+    cout << "Please Enter the password: ";
     cin >> password;
+    getline(cin, noop);
     Message * msg = new SignUpMsg(userName, password);
-    char reply[MAX_MSG_SIZE];
-    sendAndWaitAck(g_client->_socketFd, msg, reply);
+    char charAck[MAX_MSG_SIZE];
+    sendAndWaitAck(g_client->_socketFd, msg, charAck);
+    SignUpMsg * ack = (SignUpMsg *)charAck;
+    cout << ack->_signUpAck;
+    delete(msg);
 }
 
 void LoginCmd::cmdExec(vector<string> & argv) {

@@ -152,23 +152,12 @@ int sendMessage(size_t sockFd, Message * message){
 	// send chunk
 }
 
-void sendAndWaitAck(size_t sockFd, Message * message, char * reply){
-	struct timeval timeout;      
-	timeout.tv_sec = t / 1000;
-	timeout.tv_usec = (t - 1000 * timeout.tv_sec) * 1000;
+void sendAndWaitAck(size_t sockFd, Message * message, char * charAck){
 	fd_set wait_set;
 	FD_ZERO(&wait_set);
 	FD_SET(sockFd, &wait_set);
 	sendMessage(sockFd, message);
-	int res = select(sockFd + 1, &wait_set, NULL, NULL, &timeout);
-	if(res == 0){
-		cout << "timeout when connect to server" << endl;
-		exit(1);
-	}
-	else{
-		size_t data_len = recv(sockFd, reply, sizeof(reply), 0);
-		reply[data_len] = '\0';
-		printf("%s\n", reply);
-	}
+	int res = select(sockFd + 1, &wait_set, NULL, NULL, NULL);
+	size_t data_len = recv(sockFd, charAck, MAX_MSG_SIZE, 0);
 }
 

@@ -1,8 +1,9 @@
 # CFLAGS = -O3 -std=c++11
 CFLAGS = -g -Wall -std=c++11
+LIB=-lm -lbsd
 
 clientRun: main.o client.o cmdCharDef.o cmd.o
-	g++ -o $@ $(CFLAGS) main.o client.o cmdCharDef.o cmd.o socketClient.o 
+	g++ -o $@ $(CFLAGS) main.o client.o cmdCharDef.o cmd.o socketClient.o $(LIB) 
 
 main.o: main.cpp cmdCharDef.o client.o cmd.o
 	g++ -c $(CFLAGS) main.cpp

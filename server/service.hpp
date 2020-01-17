@@ -1,38 +1,50 @@
 #ifndef SERVICE_HEADER
 #define SERVICE_HEADER
-
+#include "../message/message.hpp"
 class Service{
-    virtual void service(){};
-    virtual void ackClient(){};
+    public:
+    virtual void service(size_t socketFd, Message * msg){};
 };
 
 class FileService: public Service{
-    void service() override;
-    void ackClient() override;
+    public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient();
 };
 
 class MsgService: public Service{
-    void service() override;
-    void ackClient() override;
+    public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient();
 };
 
 class SignInService: public Service{
-    void service() override;
-    void ackClient() override;
+    public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient();
+};
+
+enum UserInfoStatus{
+    USER_MATCH,
+    USER_NOT_EXIST,
+    USER_PASS_NOT_MATCH,
 };
 
 class SignUpService: public Service{
-    void service() override;
-    void ackClient() override;
+    public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient(size_t socketFd, SignUpAck ackStatus, SignUpMsg * msg);
 };
 class SignOutService: public Service{
-    void service() override;
-    void ackClient() override;
+    public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient();
 };
 
 class HistoryService: public Service{
-    void service() override;
-    void ackClient() override;
+public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient();
 };
 
 
