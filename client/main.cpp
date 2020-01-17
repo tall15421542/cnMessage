@@ -1,11 +1,11 @@
 #include<iostream>
+#include<thread>
 #include "client.hpp"
 using namespace std;
 
 Client * g_client = new Client;
 
 int main(){
-  while(1){
-    g_client->readCmd();
-  }
+    g_client->run();
+    exit(0); 
 }

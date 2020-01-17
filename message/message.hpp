@@ -68,7 +68,7 @@ class Message{
         MD5Update(&ctx, (const uint8_t*)str, len);
         MD5Final(digest, &ctx);
       }
-      
+      MsgType getMsgType(){return _header._msgType;} 
       size_t getMsgSize(){return sizeof(_header) + payloadSize();}
       virtual size_t payloadSize(){ return 0; }
 };
@@ -91,13 +91,24 @@ class BuildDataConnMsg: public Message{
     size_t payloadSize(){return sizeof(BuildDataConnMsg) - sizeof(Header);}
 };   
 
+enum ChatAck{
+    CHAT_SENT,
+    CHAT_REICEIER_NOT_EXIST,
+};
 class ChatMsg: public Message{
     public:
+      ChatMsg(){}
       ChatMsg(string sender, string receiver, string msg){
+        memset(_buf, 0, sizeof(_buf));
         makeHeader(sender, receiver, SEND_MSG, msg.length());
+        packData(msg);
       }
-      size_t payloadSize() override{ return 1;}
-      unsigned char _buf[MAX_MSG_SIZE - sizeof(Header)];
+      size_t payloadSize() override{ return sizeof(ChatMsg) - sizeof(Header);}
+      void packData(string msg){
+        memcpy(_buf, msg.c_str(), msg.length());
+      };
+      ChatAck _chatAck;
+      unsigned char _buf[MAX_MSG_SIZE - sizeof(Header) - sizeof(ChatAck)];
 };
 
 class FileMsg: public Message{

@@ -14,6 +14,9 @@ typedef map<MsgType, Service *> ServiceMap;
 typedef pair<MsgType, Service *> ServiceMapPair;
 typedef map<string, string> UserInfoMap; 
 typedef pair<string, string> UserInfoMapPair;
+typedef map<string, queue<Message *> > InboxMap;
+typedef pair<string, queue<Message *> > InboxMapPair;
+typedef queue<Message *> Inbox;
 
 class Server{
 public:
@@ -30,10 +33,12 @@ public:
     void dispatch(size_t socketFd, ChunkVec & chunkVec);
     void ackMsg(size_t socketFd, Message * msg, size_t size);
     void removeConnection(size_t socketFd);
+    void forwardMessage();
 
+    InboxMap _inboxMap;
     UserInfoMap _userInfoMap;
-    queue<Message> _messageQ;
-    vector<Message> _meesageVector;
+    queue<Message *> _messageQ;
+    vector<Message *> _meesageVector;
     ConnectionMap _connectionMap;
     ConnectionMap _dataConnMap;
     ServiceMap _serviceMap;

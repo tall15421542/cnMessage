@@ -15,7 +15,7 @@ class FileService: public Service{
 class MsgService: public Service{
     public:
     void service(size_t socketFd, Message * msg) override;
-    void ackClient();
+    void ackClient(size_t socketFd, ChatAck ackStatus, ChatMsg * msg);
 };
 
 enum UserInfoStatus{

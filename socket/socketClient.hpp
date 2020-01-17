@@ -18,10 +18,6 @@
 #include<fcntl.h>
 #include "../message/message.hpp"
 
-#define SERVER_ADDR "localhost"
-#define LISTEN_PORT 3001
-#define SERVER_PORT LISTEN
-
 struct ip_host_port{
 	char * hostname;
 	char ip[INET_ADDRSTRLEN];
@@ -33,7 +29,6 @@ struct ip_host_port{
 int to_sockaddr(ip_host_port * dst);
 int connect_wait(int sock_fd, struct sockaddr * addr, size_t addr_len);
 int buildConnection();
-int sendMessage(size_t sockFd, Message * message);
-void sendAndWaitAck(size_t sockFd, Message * message, char * reply);
+void sendAndWaitAck(size_t sockFd, Message * message, size_t size,  char * reply);
 void monitorSockFd(size_t sockFd);
 #endif // SOCKET_CLIENT_HEADER

@@ -16,7 +16,7 @@
 #include<iostream>
 size_t completeRead(size_t socketFd, char * buffer, size_t size, ChunkVec & chunkVec){
     size_t readLen = read(socketFd, buffer, size);
-    if(readLen > 0){
+    if(readLen > 0 && readLen < MAX_MSG_SIZE + 40){
         char * chunk = new char[readLen];
         memcpy(chunk, buffer, readLen);
         chunkVec.push_back(new Chunk(chunk, readLen));
@@ -38,4 +38,11 @@ size_t completeRead(size_t socketFd, char * buffer, size_t size, ChunkVec & chun
 
 size_t completeSend(size_t socketFd, void * buffer, size_t size){
     return send(socketFd, buffer, size, 0);
+}
+
+int sendMessage(size_t sockFd, Message * message, size_t size){
+	int dataLen = 0;
+    dataLen = send(sockFd, message, size, MSG_NOSIGNAL);
+	return dataLen;
+	// send chunk
 }

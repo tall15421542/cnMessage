@@ -20,12 +20,12 @@ using namespace std;
 //----------------------------------------------------------------------
 static struct termios stored_settings;
 
-static void reset_keypress(void)
+void reset_keypress(void)
 {
    tcsetattr(0,TCSANOW,&stored_settings);
 }
 
-static void set_keypress(void)
+void set_keypress(void)
 {
    struct termios new_settings;
    tcgetattr(0,&stored_settings);

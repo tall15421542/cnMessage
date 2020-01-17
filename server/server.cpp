@@ -15,6 +15,7 @@
 #include<iostream>
 #include<vector>
 #include "../socket/socketCommon.hpp"
+#include "../message/message.hpp"
 using namespace std;
 
 void 
@@ -79,9 +80,10 @@ Server::serverListen(){
 	int ret;
 	struct sockaddr_in client;
 	int client_len = sizeof(client);
-	char buf[4096];
+	char buf[MAX_MSG_SIZE + 40];
 	int read_len;
 	while(1){
+        memset(buf, 0, sizeof(buf));
 		fd_set working_readfds;
 		int working_max_fd = max_fd;
 		memcpy(&working_readfds, &readfds, sizeof(fd_set));
@@ -120,6 +122,7 @@ Server::serverListen(){
 				else{
 					printf("recv from %s:%d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
                     dispatch(fd, chunkVec);
+                    forwardMessage();
 				}
 			}
 		}
@@ -152,4 +155,32 @@ Server::dispatch(size_t socketFd, ChunkVec & chunkVec){
     Service * service = it->second;
     service->service(socketFd, message);
     delete[] data;
+}
+
+void
+Server::forwardMessage(){
+    InboxMap::iterator it = _inboxMap.begin();
+    while(it != _inboxMap.end()){
+        string userName = it->first;
+        ConnectionMap::iterator it_conn = _dataConnMap.find(userName);
+        if(it_conn != _dataConnMap.end()){
+            size_t dataConnSockFd = it_conn->second;
+            Inbox& inbox = it->second;
+            while(!inbox.empty()){
+                Message * msg = inbox.front();
+                if(msg->getMsgType() == SEND_MSG){
+                    sendMessage(dataConnSockFd, msg, sizeof(ChatMsg));
+                }
+                else if(msg->getMsgType() == SEND_FILE){
+                    sendMessage(dataConnSockFd, msg, sizeof(FileMsg));
+                }
+                else{
+                    cout << "\nUnhandle msg type" << endl;
+                    exit(1);
+                }
+                inbox.pop();
+            }
+        }
+        ++it;
+    }
 }

@@ -18,13 +18,8 @@
 using namespace std;
 #include "../message/message.hpp"
 #include "socketCommon.hpp"
-
-
-struct ip_host_port{
-	char * hostname;
-	char ip[INET_ADDRSTRLEN];
-	int port;
-};
+#include "../client/client.hpp"
+extern Client * g_client;
 
 #define t 1000.0
 #define n = 0
@@ -142,27 +137,31 @@ int buildConnection(){
 	return sock_fd;
 }
 
-int sendMessage(size_t sockFd, Message * message){
-	int dataLen = 0;
-	if(message->_header._contentLength < PAY_LOAD_LIMIT){
-		dataLen = send(sockFd, message, sizeof(Header) + message->payloadSize(), MSG_NOSIGNAL);
-	}
-	return dataLen;
-	// send chunk
-}
 
-void sendAndWaitAck(size_t sockFd, Message * message, char * charAck){
+void sendAndWaitAck(size_t sockFd, Message * message, size_t size, char * charAck){
 	fd_set wait_set;
 	FD_ZERO(&wait_set);
 	FD_SET(sockFd, &wait_set);
-	sendMessage(sockFd, message);
+	sendMessage(sockFd, message, size);
 	int res = select(sockFd + 1, &wait_set, NULL, NULL, NULL);
 	size_t data_len = recv(sockFd, charAck, MAX_MSG_SIZE, 0);
 }
 
 void monitorSockFd(size_t sockFd){
 	fd_set wait_set;
-	FD_ZERO(&wait_set);
-	FD_SET(sockFd, &wait_set);
-	int res = select(sockFd + 1, &wait_set, NULL, NULL, NULL);
+    char charMsg[MAX_MSG_SIZE + 40];
+    while(1){
+        if(g_client->_clientState == IDLE_CLIENT){
+            sleep(5);
+            continue;
+        }
+        memset(charMsg, 0, sizeof(charMsg));
+        FD_ZERO(&wait_set);
+        FD_SET(sockFd, &wait_set);
+        int res = select(sockFd + 1, &wait_set, NULL, NULL, NULL);
+        size_t data_len = recv(sockFd, charMsg, sizeof(charMsg), 0);
+        Message * msg = (Message *)charMsg;
+        cout << "\nreceive packet from " << string(msg->_header._sender) << endl;
+        g_client->reprintCmd();
+    }
 }

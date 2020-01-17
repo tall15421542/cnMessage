@@ -4,6 +4,7 @@
 #include<iostream>
 #include<vector>
 #include<string>
+#include<thread>
 #include "cmd.hpp"
 #include "cmdCharDef.h"
 #include "../socket/socketClient.hpp"
@@ -26,17 +27,19 @@ class Client{
 #define READ_BUF_SIZE    65536
 #define TAB_POSITION     8
 #define PG_OFFSET        10
-  public:
+#define STDIN            0
+    public:
     Client(): _readBufPtr(_readBuf), _readBufEnd(_readBuf), _historyIdx(0), _tempCmdStored(false),
-              _clientState(IDLE_CLIENT), _userName("Unknown"), _personTalking("NOBODY")
+              _clientState(IDLE_CLIENT), _userName("Unknown"), _personTalking("NOBODY"), _dataConnSocketFd(0)
     {
       _cmdExecMap.insert(CmdRegPair("send", new SendCmd));
       _cmdExecMap.insert(CmdRegPair("signIn", new SignInCmd));
       _cmdExecMap.insert(CmdRegPair("signOut", new SignOutCmd));
       _cmdExecMap.insert(CmdRegPair("signUp", new SignUpCmd));
       _cmdExecMap.insert(CmdRegPair("retrieve", new RetrieveCmd));
-      _socketFd = buildConnection();
+       _socketFd = buildConnection();
     }
+    void run();
     void resetBufAndPrintPrompt() {
         _readBufPtr = _readBufEnd = _readBuf;
         *_readBufPtr = 0;
@@ -44,7 +47,7 @@ class Client{
     }
     void readCmd();
     void readCmdInt(istream&);
-    void printPrompt() const { cout << this->_userName << "> "; }
+    void printPrompt() const { cout << this->_userName << "> " << flush; }
     bool moveBufPtr(char* const);
     bool deleteChar();
     void insertChar(char, int = 1);
@@ -67,6 +70,9 @@ class Client{
     size_t buildDataConn();
     void closeDataConn();
     void monitorMsg();
+
+    fd_set _readFdSet;
+    fd_set _writeFdSet;
     // for read cmd 
     char      _readBuf[READ_BUF_SIZE];
     char*     _readBufPtr;

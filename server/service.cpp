@@ -2,20 +2,6 @@
 #include "server.hpp"
 
 extern Server * g_server;
-void 
-FileService::service(size_t socketFd, Message * msg){
-
-}
-
-void 
-FileService::ackClient(){
-}
-
-void 
-MsgService::service(size_t socketFd, Message * msg){
-
-}
-
 // util
 
 UserInfoStatus userInfoStatus(string userName, string password){
@@ -33,8 +19,38 @@ UserInfoStatus userInfoStatus(string userName, string password){
 }
 
 void 
-MsgService::ackClient(){
+FileService::service(size_t socketFd, Message * msg){
 
+}
+
+void 
+FileService::ackClient(){
+}
+
+void 
+MsgService::service(size_t socketFd, Message * msg){
+    ChatMsg * chatMsg = new ChatMsg();
+    memset(chatMsg, 0, sizeof(ChatMsg));
+    memcpy(chatMsg, msg, sizeof(ChatMsg));
+    string receiver(chatMsg->_header._receiver);
+    UserInfoMap::iterator it_user = g_server->_userInfoMap.find(receiver);
+    if(it_user == g_server->_userInfoMap.end()){
+        delete chatMsg;
+        ackClient(socketFd, CHAT_REICEIER_NOT_EXIST, chatMsg);
+        return;
+    }
+
+    InboxMap::iterator it = g_server->_inboxMap.find(receiver);
+    it->second.push(chatMsg);
+
+    ackClient(socketFd, CHAT_SENT, chatMsg);
+}
+
+void 
+MsgService::ackClient(size_t socketFd, ChatAck ackStatus, ChatMsg * ack){
+    ack->_header._isAck = true;
+    ack->_chatAck = ackStatus;    
+    g_server->ackMsg(socketFd, ack, sizeof(ChatMsg)); 
 }
 
 // class SignInService 
@@ -79,6 +95,7 @@ SignUpService::service(size_t socketFd, Message * msg){
             g_server->_userInfoMap.insert(UserInfoMapPair(userName, password));
             ackClient(socketFd, SIGNUP_ACK_SUCCESS, signUpMsg);
             g_server->_connectionMap.insert(ConnectionMapPair(userName, socketFd));
+            g_server->_inboxMap.insert(InboxMapPair(userName, queue<Message *>()));
             break;
         default:
             ackClient(socketFd, SIGNUP_ACK_FAIL, signUpMsg);
