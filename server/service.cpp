@@ -53,6 +53,7 @@ SignInService::service(size_t socketFd, Message * msg){
             break;
         case USER_MATCH:
             ackClient(socketFd, SIGNIN_ACK_SUCCESS, signInMsg);
+            g_server->_connectionMap.insert(ConnectionMapPair(userName, socketFd));
             break;
         default:
             cout << "\nUnhandle userInfo status" << endl;
@@ -77,6 +78,7 @@ SignUpService::service(size_t socketFd, Message * msg){
         case USER_NOT_EXIST:
             g_server->_userInfoMap.insert(UserInfoMapPair(userName, password));
             ackClient(socketFd, SIGNUP_ACK_SUCCESS, signUpMsg);
+            g_server->_connectionMap.insert(ConnectionMapPair(userName, socketFd));
             break;
         default:
             ackClient(socketFd, SIGNUP_ACK_FAIL, signUpMsg);
@@ -90,12 +92,20 @@ void SignUpService::ackClient(size_t sockFd, SignUpAck ackStatus, SignUpMsg * ac
 
 // class SignOutService
 void 
-SignOutService::service(size_t socketFd, Message * msg){
-
+SignOutService::service(size_t sockFd, Message * msg){
+    SignOutMsg * signOutMsg = (SignOutMsg * )msg;
+    string userName(reinterpret_cast<char *>(signOutMsg->_userName));
+    ConnectionMap::iterator it = g_server->_connectionMap.find(userName);
+    if(it != g_server->_connectionMap.end()){
+        g_server->_connectionMap.erase(userName);
+        ackClient(sockFd, SIGNOUT_ACK_SUCCESS, signOutMsg);
+    }
 }
 void 
-SignOutService::ackClient(){
-
+SignOutService::ackClient(size_t sockFd, SignOutAck ackStatus, SignOutMsg * ack){
+    ack->_header._isAck = true;
+    ack->_signOutAck = ackStatus;    
+    g_server->ackMsg(sockFd, ack, sizeof(SignOutMsg)); 
 }
 
 // class HistoryService

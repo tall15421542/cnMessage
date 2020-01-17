@@ -111,10 +111,23 @@ class SignInMsg: public Message{
         unsigned char _password[MD5_DIGEST_LENGTH];
 };
 
+enum SignOutAck{
+    SIGNOUT_ACK_SUCCESS,
+};
+
 class SignOutMsg: public Message{
     public:
+      SignOutMsg(string userName){
+        memset(_userName, 0, sizeof(_userName));
+        makeHeader("", "", SIGNUP, payloadSize());
+        packData(userName);
+      }
+      void packData(string userName){
+        memcpy(_userName, userName.c_str(), userName.length());
+      }
       size_t payloadSize() override{return 1;}
-        unsigned char _userName[USER_NAME_LENGTH];
+      SignOutAck _signOutAck;
+      unsigned char _userName[USER_NAME_LENGTH];
 };
 
 enum SignUpAck{
@@ -132,7 +145,6 @@ class SignUpMsg: public Message{
         size_t payloadSize() override{ return sizeof(SignUpMsg) - sizeof(Header); }
         void packData(string userName, string password){
             memcpy(_userName, userName.c_str(), userName.length());
-            _userName[userName.length()] = 0;
             md5(password.c_str() , password.length(), _password);
         }
         SignUpAck _signUpAck;

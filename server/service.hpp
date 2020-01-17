@@ -18,17 +18,18 @@ class MsgService: public Service{
     void ackClient();
 };
 
-class SignInService: public Service{
-    public:
-    void service(size_t socketFd, Message * msg) override;
-    void ackClient();
-};
-
 enum UserInfoStatus{
     USER_MATCH,
     USER_NOT_EXIST,
     USER_PASS_NOT_MATCH,
 };
+
+class SignInService: public Service{
+    public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient(size_t socketFd, SignInAck ackStatus, SignInMsg * msg);
+};
+
 
 class SignUpService: public Service{
     public:
@@ -38,7 +39,7 @@ class SignUpService: public Service{
 class SignOutService: public Service{
     public:
     void service(size_t socketFd, Message * msg) override;
-    void ackClient();
+    void ackClient(size_t socketFd, SignOutAck ackStatus, SignOutMsg * msg);
 };
 
 class HistoryService: public Service{
