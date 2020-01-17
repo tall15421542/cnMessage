@@ -25,16 +25,19 @@ public:
         _serviceMap.insert(ServiceMapPair(SIGNIN, new SignInService));
         _serviceMap.insert(ServiceMapPair(SIGNUP, new SignUpService));
         _serviceMap.insert(ServiceMapPair(SIGNOUT, new SignOutService));
+        _serviceMap.insert(ServiceMapPair(BUILD_DATA_CONN, new BuildDataConnService));
     }
     void serverListen();
     void receiveCompleteMsg();
     void dispatch(size_t socketFd, ChunkVec & chunkVec);
     void ackMsg(size_t socketFd, Message * msg, size_t size);
+    void removeConnection(size_t socketFd);
 
     UserInfoMap _userInfoMap;
     queue<Message> _messageQ;
     vector<Message> _meesageVector;
     ConnectionMap _connectionMap;
+    ConnectionMap _dataConnMap;
     ServiceMap _serviceMap;
     size_t _listenPort;
     size_t _masterSocketFd;

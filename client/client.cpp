@@ -45,6 +45,10 @@ Client::execCmd(vector<string> &cmdTokens){
     }
 }
 
+void 
+Client::monitorMsg(){
+}
+
 void
 Client::readCmdInt(istream& istr)
 {
@@ -337,4 +341,28 @@ Client::retrieveHistory()
    strcpy(_readBuf, _history[_historyIdx].c_str());
    cout << _readBuf;
    _readBufPtr = _readBufEnd = _readBuf + _history[_historyIdx].size();
+}
+
+
+size_t 
+Client::buildDataConn(){
+    _dataConnSocketFd = buildConnection();
+    BuildDataConnMsg * msg = new BuildDataConnMsg(_userName);
+    char charAck[MAX_MSG_SIZE];
+    sendAndWaitAck(_dataConnSocketFd, msg, charAck);
+    BuildDataConnMsg * ack = (BuildDataConnMsg *)charAck;
+    if(ack->_buildDataConnAck == DATA_CONN_SUCCESS){
+        cout << "Data socket is build" << endl;
+    }
+    else{
+        cout << "Data socket is duplicated" << endl;
+    }
+    delete msg;
+    return _dataConnSocketFd;
+}
+
+void 
+Client::closeDataConn(){
+    close(_dataConnSocketFd);
+    _dataConnSocketFd = 0;
 }

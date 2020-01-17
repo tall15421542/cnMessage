@@ -62,8 +62,11 @@ class Client{
     // for cmdExec
     void printError(CMD_ERROR error, string cmd);
     void execCmd(vector<string> &);
-    
-    // for send
+   
+    // for monitor message from server
+    size_t buildDataConn();
+    void closeDataConn();
+    void monitorMsg();
     // for read cmd 
     char      _readBuf[READ_BUF_SIZE];
     char*     _readBufPtr;
@@ -81,6 +84,9 @@ class Client{
     size_t _socketFd;
     string _userName;
     string _personTalking;
+
+    // for data
+    size_t _dataConnSocketFd;
 };
 
 

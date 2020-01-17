@@ -49,6 +49,7 @@ void SignUpCmd::cmdExec(vector<string> & argv){
         case SIGNUP_ACK_SUCCESS:
             g_client->_clientState = SIGNIN_CLIENT;
             g_client->_userName = userName;
+            g_client->buildDataConn();
             break;
         case SIGNUP_ACK_FAIL:
             cout << "username " << ack->_userName << " is already used\n";
@@ -78,6 +79,7 @@ void SignInCmd::cmdExec(vector<string> & argv) {
         case SIGNIN_ACK_SUCCESS:
             g_client->_clientState = SIGNIN_CLIENT;
             g_client->_userName = userName;
+            g_client->buildDataConn();
             break;
         case SIGNIN_ACK_USER_NOT_EXIST:
             cout << "username " << ack->_userName << " is not existed\n";
@@ -102,6 +104,7 @@ void SignOutCmd::cmdExec(vector<string> & argv) {
     if(ack->_signOutAck == SIGNOUT_ACK_SUCCESS){
         g_client->_userName = "unknown";
         g_client->_clientState = IDLE_CLIENT;
+        g_client->closeDataConn();
     }
     else{
         cout << "Unhandle signout status" << endl;

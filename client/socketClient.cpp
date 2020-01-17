@@ -161,3 +161,5 @@ void sendAndWaitAck(size_t sockFd, Message * message, char * charAck){
 	size_t data_len = recv(sockFd, charAck, MAX_MSG_SIZE, 0);
 }
 
+void monitorSockFd(size_t sockFd){
+}

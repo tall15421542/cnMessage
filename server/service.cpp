@@ -118,4 +118,23 @@ HistoryService::ackClient(){
 
 }
 
-
+// class BuildDataConn
+void 
+BuildDataConnService::service(size_t sockFd, Message * msg){
+    BuildDataConnMsg * connMsg = (BuildDataConnMsg *)msg;
+    string userName(reinterpret_cast<char *>(connMsg->_userName));
+    ConnectionMap::iterator it = g_server->_dataConnMap.find(userName);
+    if(it == g_server->_dataConnMap.end()){
+      cout << "Build data conn success for " << userName << endl;
+       g_server->_dataConnMap.insert(ConnectionMapPair(userName, sockFd));
+       ackClient(sockFd, DATA_CONN_SUCCESS, connMsg); 
+    }else{
+        ackClient(sockFd, DATA_CONN_DUP, connMsg);
+    }
+}
+void 
+BuildDataConnService::ackClient(size_t sockFd, BuildDataConnAck ackStatus, BuildDataConnMsg * ack){
+    ack->_header._isAck = true;
+    ack->_buildDataConnAck = ackStatus;    
+    g_server->ackMsg(sockFd, ack, sizeof(BuildDataConnMsg)); 
+}

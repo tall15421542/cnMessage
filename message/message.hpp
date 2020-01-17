@@ -13,6 +13,7 @@ enum MsgType{
     SIGNUP,
     SIGNOUT,
     HISTORY,
+    BUILD_DATA_CONN,
 };
 
 
@@ -71,6 +72,24 @@ class Message{
       size_t getMsgSize(){return sizeof(_header) + payloadSize();}
       virtual size_t payloadSize(){ return 0; }
 };
+
+enum BuildDataConnAck{
+    DATA_CONN_DUP,
+    DATA_CONN_SUCCESS,
+    DATA_CONN_FAIL,
+};
+
+class BuildDataConnMsg: public Message{
+    public:
+    BuildDataConnMsg(string userName){
+        makeHeader("", "", BUILD_DATA_CONN, payloadSize());
+        memset(_userName, 0, sizeof(_userName));
+        memcpy(_userName, userName.c_str(), userName.length());
+    }
+    BuildDataConnAck _buildDataConnAck;
+    unsigned char _userName[USER_NAME_LENGTH];
+    size_t payloadSize(){return sizeof(BuildDataConnMsg) - sizeof(Header);}
+};   
 
 class ChatMsg: public Message{
     public:

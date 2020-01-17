@@ -48,5 +48,10 @@ public:
     void ackClient();
 };
 
+class BuildDataConnService: public Service{
+public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient(size_t socketFd, BuildDataConnAck ackStatus, BuildDataConnMsg * msg);
+};
 
 #endif // SERVICE_HEADER

@@ -11,6 +11,7 @@
 #include <sys/select.h>
 #include<unistd.h>
 #include<signal.h>
+#include<assert.h>
 #include<iostream>
 #include<vector>
 using namespace std;
@@ -43,6 +44,32 @@ size_t completeSend(size_t socketFd, void * buffer, size_t size){
 void 
 Server::ackMsg(size_t socketFd, Message * msg, size_t size){
     completeSend(socketFd, msg, size);
+}
+
+void
+Server::removeConnection(size_t socketFd){
+    ConnectionMap::iterator it = _connectionMap.begin();
+    while(it != _connectionMap.end()){
+        if(it->second == socketFd){
+            _connectionMap.erase(it);
+            it = _dataConnMap.find(it->first);
+            assert(it != _dataConnMap.end());
+            _dataConnMap.erase(it);
+            return;
+        }
+        ++it;
+    }
+    it = _dataConnMap.begin();
+    while(it != _dataConnMap.end()){
+        if(it->second == socketFd){
+            _dataConnMap.erase(it);
+            it = _connectionMap.find(it->first);
+            assert(it != _connectionMap.end());
+            _connectionMap.erase(it);
+            return;
+        }
+        ++it;
+    }
 }
 
 void 
@@ -110,6 +137,7 @@ Server::serverListen(){
                     printf("Host disconnected , ip %s , port %d \n" ,  
 							inet_ntoa(client.sin_addr) , ntohs(client.sin_port));   
                     //Close the socket and mark as 0 in list for reuse  
+                    removeConnection(fd);
                     close(fd);
 					FD_CLR(fd, &readfds);
 				}
