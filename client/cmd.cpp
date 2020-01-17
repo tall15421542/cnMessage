@@ -29,8 +29,8 @@ void SendFileCmd::sendContent() {
 }
 
 void SignUpCmd::cmdExec(vector<string> & argv){
-    if(g_client->_clientState != IDLE){
-        cout << "\n you are already signIn";
+    if(g_client->_clientState != IDLE_CLIENT){
+        cout << "\nyou are already signIn";
         return;
     }
     string userName;
@@ -45,7 +45,15 @@ void SignUpCmd::cmdExec(vector<string> & argv){
     char charAck[MAX_MSG_SIZE];
     sendAndWaitAck(g_client->_socketFd, msg, charAck);
     SignUpMsg * ack = (SignUpMsg *)charAck;
-    cout << ack->_signUpAck;
+    switch(ack->_signUpAck){
+        case SIGNUP_ACK_SUCCESS:
+            g_client->_clientState = SIGNIN_CLIENT;
+            g_client->_userName = userName;
+            break;
+        case SIGNUP_ACK_FAIL:
+            cout << "username " << ack->_userName << " is already used\n";
+            break;
+    }
     delete(msg);
 }
 

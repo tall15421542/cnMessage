@@ -12,9 +12,9 @@ class Client;
 
 extern Client * g_client;
 enum ClientState{
-  IDLE,
-  LOGIN,
-  TALKING,
+  IDLE_CLIENT,
+  SIGNIN_CLIENT,
+  TALKING_CLIENT,
 };
 
 enum CMD_ERROR{
@@ -28,7 +28,7 @@ class Client{
 #define PG_OFFSET        10
   public:
     Client(): _readBufPtr(_readBuf), _readBufEnd(_readBuf), _historyIdx(0), _tempCmdStored(false),
-              _clientState(IDLE), _userName("Unknown"), _personTalking("NOBODY")
+              _clientState(IDLE_CLIENT), _userName("Unknown"), _personTalking("NOBODY")
     {
       _cmdExecMap.insert(CmdRegPair("send", new SendCmd));
       _cmdExecMap.insert(CmdRegPair("login", new LoginCmd));
