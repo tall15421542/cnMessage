@@ -4,9 +4,71 @@
 #include "../socket/socketClient.hpp"
 #include <iostream>
 #include <assert.h>
+#include <set>
 
 using namespace std;
 extern Client * g_client;
+
+void UpdateCmd::cmdExec(vector<string>& argv){
+   if(g_client->_clientState == IDLE_CLIENT){
+        cout << "\nplease sign in first" << endl;
+        return;
+   }
+   UpdateMsg * msg = new UpdateMsg(g_client->_userName);
+   vector<char *>charAckVec;
+   sendAndWaitAckStatus(g_client->_socketFd, msg, sizeof(UpdateMsg), UPDATE_COMPLETE, charAckVec);
+   for(size_t i = 0 ; i < charAckVec.size() ; ++i){
+     g_client->_messageRecord.push_back((Message *)charAckVec[i]);
+   }
+   cout << "\nYou have " << charAckVec.size() - 1 << "unread message";
+}
+
+
+void ReadCmd::cmdExec(vector<string>& argv){
+    for(size_t i = 0 ; i < g_client->_messageRecord.size() ; ++i){
+        ChatMsg * msg = (ChatMsg *)g_client->_messageRecord[i];
+        string sender(msg->_header._sender);
+        string receiver(msg->_header._receiver);
+        string key;
+        if(sender != g_client->_userName){
+            key = sender;
+        }
+        else{
+            key = receiver;
+        }
+        MsgRecordMap::iterator it = g_client->_msgRecordMap.find(key);
+        if(it != g_client->_msgRecordMap.end()){
+            it->second->push_back(msg);
+        }
+        else{
+            vector<Message *> * vec = new vector<Message *>;
+            vec->push_back(msg);
+            g_client->_msgRecordMap.insert(MsgRecordMapPair(key, vec));
+        }
+    }
+    g_client->_messageRecord.clear();
+    if(argv[1] == "-l"){
+        MsgRecordMap::iterator it = g_client->_msgRecordMap.begin();
+        cout << "\n";
+        while(it != g_client->_msgRecordMap.end()){
+            cout << it->first << endl;
+            ++it;
+        }
+        return;
+    }
+    cout << "\n";
+    for(int i = 1 ; i < argv.size() ; ++i){
+        MsgRecordMap::iterator it = g_client->_msgRecordMap.find(argv[i]);
+        vector<Message *> * vec = it->second;
+        cout << argv[i] << " #######################\n";
+        for(size_t i = 0 ; i < vec->size() ; ++i){
+            ChatMsg * msg = (ChatMsg*)(*vec)[i];
+            cout << msg->_header._sender << ": ";
+            cout << string(reinterpret_cast<char *>(msg->_buf)) << endl;
+        }
+        
+    }
+}
 
 void SendCmd::cmdExec(vector<string>& argv) {
     assert(argv.size() <= 2);
@@ -24,10 +86,10 @@ void SendCmd::cmdExec(vector<string>& argv) {
             return;
         }
     }
+
     string msgContent, noop;
     cout << "\nreceiver " << g_client->_personTalking << ": " << flush;
-    cin >> msgContent;
-    getline(cin, noop);
+    getline(cin ,msgContent);
     ChatMsg * chatMsg = new ChatMsg(g_client->_userName, g_client->_personTalking, msgContent);
     char charAck[MAX_MSG_SIZE];
     sendAndWaitAck(g_client->_socketFd, chatMsg, sizeof(ChatMsg), charAck);
@@ -37,7 +99,6 @@ void SendCmd::cmdExec(vector<string>& argv) {
             cout <<"\nreceiver is not exist" << flush;
             break;
         case CHAT_SENT:
-            cout << "\nmessage is sent" << flush;
             break;
         default:
             cout << "\nUnhandle chat ack\n" << flush;

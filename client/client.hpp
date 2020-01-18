@@ -23,6 +23,8 @@ enum CMD_ERROR{
 };
 typedef map<const string, Cmd*> CmdMap;
 typedef pair<const string, Cmd*>  CmdRegPair;
+typedef map<string, vector<Message*> *> MsgRecordMap;
+typedef pair<string, vector<Message*> *> MsgRecordMapPair;
 class Client{
 #define READ_BUF_SIZE    65536
 #define TAB_POSITION     8
@@ -37,7 +39,9 @@ class Client{
       _cmdExecMap.insert(CmdRegPair("signOut", new SignOutCmd));
       _cmdExecMap.insert(CmdRegPair("signUp", new SignUpCmd));
       _cmdExecMap.insert(CmdRegPair("retrieve", new RetrieveCmd));
-       _socketFd = buildConnection();
+      _cmdExecMap.insert(CmdRegPair("update", new UpdateCmd)); 
+      _cmdExecMap.insert(CmdRegPair("read", new ReadCmd));
+      _socketFd = buildConnection();
     }
     void run();
     void resetBufAndPrintPrompt() {
@@ -47,7 +51,13 @@ class Client{
     }
     void readCmd();
     void readCmdInt(istream&);
-    void printPrompt() const { cout << this->_userName << "> " << flush; }
+    void printPrompt() const { 
+        cout << this->_userName << flush;
+        if(_clientState == TALKING_CLIENT){
+            cout << "(Talking to " << _personTalking << ")" << flush;
+        }
+        cout << ">" << flush;
+    }
     bool moveBufPtr(char* const);
     bool deleteChar();
     void insertChar(char, int = 1);
@@ -85,7 +95,7 @@ class Client{
     map<string , vector<char*> *> _messageStore;
     map<string , Cmd*> _cmdExecMap;
     ClientState _clientState;
-
+    
     // for msg
     size_t _socketFd;
     string _userName;
@@ -93,6 +103,8 @@ class Client{
 
     // for data
     size_t _dataConnSocketFd;
+    vector<Message *> _messageRecord;
+    MsgRecordMap _msgRecordMap;
 };
 
 

@@ -18,6 +18,11 @@ class MsgService: public Service{
     void ackClient(size_t socketFd, ChatAck ackStatus, ChatMsg * msg);
 };
 
+class UpdateService: public Service{
+    public:
+    void service(size_t socketFd, Message * msg) override;
+    void ackClient(size_t socketFd, UpdateAck ackStatus, UpdateMsg * msg);
+};
 enum UserInfoStatus{
     USER_MATCH,
     USER_NOT_EXIST,

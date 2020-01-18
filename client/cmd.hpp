@@ -23,6 +23,20 @@ class Cmd{
     virtual void cmdExec(vector<string>& argv){ cout << "\n no it's base!";}
 };
 
+class ReadCmd: public Cmd{
+    public:
+        ReadCmd(){};
+        ~ReadCmd();
+    void cmdExec(vector<string> & argv);
+};
+
+class UpdateCmd: public Cmd{
+    public:
+        UpdateCmd(){};
+        ~UpdateCmd();
+    void cmdExec(vector<string>& argv) override;
+};
+
 // send message/file
 class SendCmd: public Cmd{
   public:

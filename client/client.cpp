@@ -110,12 +110,10 @@ void Client::completeCmd(){
            _readBufPtr = _readBufEnd = _readBuf + samePrefixCmd[0].size();
         }
         else{
-            cout << "\n" << endl;
             for(size_t idx = 0 ; idx < samePrefixCmd.size() ; ++idx){
                 if(idx % 5 == 0 ) cout << endl;
                 cout << setw(16) << left << samePrefixCmd[idx] << flush;
             }
-            cout << "\n" << endl;
             reprintCmd();
         }
     }
@@ -399,8 +397,6 @@ Client::run(){
                 cout << "\nServer is disconnected" << endl;
                 exit(1);
             }
-            cout << "\nreceive data from " << _socketFd << endl;
-            reprintCmd();        
         }
         else if(_clientState != IDLE_CLIENT && FD_ISSET(_dataConnSocketFd, &working_read_set)){
             ChunkVec chunkVec;
@@ -408,7 +404,22 @@ Client::run(){
                 cout << "\nServer is disconnected" << endl;
                 exit(1);
             }
-            cout << "\nreceive data from "<< _dataConnSocketFd << endl;
+            Message * firstPacket = (Message *)chunkVec[0]->_data;
+            MsgType msgType = firstPacket->getMsgType();
+            if(msgType == SEND_MSG){
+                ChatMsg * chatMsg = (ChatMsg *)firstPacket;
+                _messageRecord.push_back(chatMsg);
+                if(chatMsg->_header._sender == _personTalking){
+                    cout << "\n#####################################" << endl;
+                    cout <<  _personTalking << ": " << string(reinterpret_cast<char *>(chatMsg->_buf)) << endl;
+                    cout << "######################################" << endl;
+                }
+                else{
+                    cout << "\n#####################################" << endl;
+                    cout << "have new message from " << chatMsg->_header._sender << endl;
+                    cout << "######################################" << endl;
+                }
+            }
             reprintCmd();
         }
         else{

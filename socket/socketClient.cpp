@@ -17,7 +17,7 @@
 #include<iostream>
 using namespace std;
 #include "../message/message.hpp"
-#include "socketCommon.hpp"
+#include "../socket/socketCommon.hpp"
 #include "../client/client.hpp"
 extern Client * g_client;
 
@@ -144,7 +144,24 @@ void sendAndWaitAck(size_t sockFd, Message * message, size_t size, char * charAc
 	FD_SET(sockFd, &wait_set);
 	sendMessage(sockFd, message, size);
 	int res = select(sockFd + 1, &wait_set, NULL, NULL, NULL);
-	size_t data_len = recv(sockFd, charAck, MAX_MSG_SIZE, 0);
+	size_t data_len = recv(sockFd, charAck, MAX_MSG_SIZE + 40, 0);
+}
+
+void sendAndWaitAckStatus(size_t sockFd, Message * message, size_t size, int status, vector<char *> &charAckVec){
+    fd_set wait_set;
+    FD_ZERO(&wait_set);
+    FD_SET(sockFd, &wait_set);
+    sendMessage(sockFd, message, size);
+    while(1){
+        FD_ZERO(&wait_set);
+        FD_SET(sockFd, &wait_set);
+        int res = select(sockFd + 1, &wait_set, NULL, NULL, NULL);
+        char * ack = new char[MAX_MSG_SIZE + 40];
+        recv(sockFd, ack, MAX_MSG_SIZE + 40, 0);
+        charAckVec.push_back(ack);
+        UpdateMsg * mesg = (UpdateMsg *)ack;
+        if(mesg->_updateAck == UPDATE_COMPLETE) break;
+    }
 }
 
 void monitorSockFd(size_t sockFd){
@@ -161,7 +178,6 @@ void monitorSockFd(size_t sockFd){
         int res = select(sockFd + 1, &wait_set, NULL, NULL, NULL);
         size_t data_len = recv(sockFd, charMsg, sizeof(charMsg), 0);
         Message * msg = (Message *)charMsg;
-        cout << "\nreceive packet from " << string(msg->_header._sender) << endl;
         g_client->reprintCmd();
     }
 }

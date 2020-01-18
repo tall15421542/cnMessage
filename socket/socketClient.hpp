@@ -31,4 +31,5 @@ int connect_wait(int sock_fd, struct sockaddr * addr, size_t addr_len);
 int buildConnection();
 void sendAndWaitAck(size_t sockFd, Message * message, size_t size,  char * reply);
 void monitorSockFd(size_t sockFd);
+void sendAndWaitAckStatus(size_t sockFd, Message * message, size_t size, int status, vector<char *> &chackAckVec);
 #endif // SOCKET_CLIENT_HEADER

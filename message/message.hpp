@@ -14,6 +14,7 @@ enum MsgType{
     SIGNOUT,
     HISTORY,
     BUILD_DATA_CONN,
+    UPDATE,
 };
 
 
@@ -26,7 +27,7 @@ void md5(const char* str, size_t len, uint8_t digest[MD5_DIGEST_LENGTH]);
 
 class Chunk{
     public:
-        Chunk(char * data, size_t size):_data(data), _size(size){ cout << "Hello" << endl;}
+        Chunk(char * data, size_t size):_data(data), _size(size){} 
         ~Chunk(){delete[] _data;}
         char * _data;
         size_t _size;
@@ -91,6 +92,7 @@ class BuildDataConnMsg: public Message{
     size_t payloadSize(){return sizeof(BuildDataConnMsg) - sizeof(Header);}
 };   
 
+
 enum ChatAck{
     CHAT_SENT,
     CHAT_REICEIER_NOT_EXIST,
@@ -111,6 +113,27 @@ class ChatMsg: public Message{
       unsigned char _buf[MAX_MSG_SIZE - sizeof(Header) - sizeof(ChatAck)];
 };
 
+enum UpdateAck{
+    UPDATE_ING,
+    UPDATE_COMPLETE,
+};
+class UpdateMsg: public Message{
+    public:
+    UpdateMsg(string userName){
+        makeHeader(userName, "", UPDATE, sizeof(UpdateAck));
+    }
+    UpdateMsg(Message * msg){
+        makeHeader(string(reinterpret_cast<char *>(msg->_header._sender)), 
+                   string(reinterpret_cast<char *>(msg->_header._receiver)), UPDATE, msg->_header._completeLength);
+        packData((ChatMsg *)msg);
+    }
+    void packData(ChatMsg * msg){
+        size_t dataSize = msg->_header._completeLength;
+        memcpy(_buf, msg->_buf, sizeof(dataSize));
+    }
+    UpdateAck _updateAck;
+    unsigned char _buf[MAX_MSG_SIZE - sizeof(Header) - sizeof(UpdateAck)];
+};
 class FileMsg: public Message{
     public:
       size_t payloadSize() override{ return 1; }

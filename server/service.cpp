@@ -27,6 +27,31 @@ void
 FileService::ackClient(){
 }
 
+void
+UpdateService::service(size_t socketFd, Message * msg){
+    string userName = string(reinterpret_cast<char *>(msg->_header._sender));
+    MsgDataMap::iterator it = g_server->_msgDataMap.find(userName);
+    if(it == g_server->_msgDataMap.end()){
+        ackClient(socketFd, UPDATE_COMPLETE, (UpdateMsg *)msg);
+        return;
+    }
+    
+    vector<Message *> * database = it->second;
+    for(size_t  i = 0 ; i < database->size() ; ++i){
+        UpdateMsg * updateMsg = new UpdateMsg((*database)[i]);
+        ackClient(socketFd, UPDATE_ING, updateMsg);
+        delete updateMsg;
+    }
+    ackClient(socketFd, UPDATE_COMPLETE, (UpdateMsg *)msg);
+}
+
+void
+UpdateService::ackClient(size_t socketFd, UpdateAck ackStatus, UpdateMsg * ack){
+    ack->_header._isAck = true;
+    ack->_updateAck = ackStatus;    
+    g_server->ackMsg(socketFd, ack, sizeof(UpdateMsg)); 
+}
+
 void 
 MsgService::service(size_t socketFd, Message * msg){
     ChatMsg * chatMsg = new ChatMsg();

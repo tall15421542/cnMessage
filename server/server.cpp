@@ -158,6 +158,21 @@ Server::dispatch(size_t socketFd, ChunkVec & chunkVec){
 }
 
 void
+Server::addToMsgDataMap(ChatMsg* msg, string userName){
+    MsgDataMap::iterator it = _msgDataMap.find(userName);
+    if(it == _msgDataMap.end()){
+        vector<Message *> * vec = new vector<Message *>;
+        vec->push_back(msg);
+        _msgDataMap.insert(MsgDataMapPair(userName, vec));
+    }
+    else{
+        vector<Message *> * vec = it->second;
+        vec->push_back(msg);
+    }
+
+}
+
+void
 Server::forwardMessage(){
     InboxMap::iterator it = _inboxMap.begin();
     while(it != _inboxMap.end()){
@@ -178,6 +193,8 @@ Server::forwardMessage(){
                     cout << "\nUnhandle msg type" << endl;
                     exit(1);
                 }
+                addToMsgDataMap((ChatMsg *)msg, string(reinterpret_cast<char *>(msg->_header._sender)));
+                addToMsgDataMap((ChatMsg *)msg, string(reinterpret_cast<char *>(msg->_header._receiver)));
                 inbox.pop();
             }
         }
